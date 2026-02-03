@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jadwal Guru</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <h1>🔔 Jadwal Mengajar</h1>
+  <p id="status">Notifikasi: belum aktif</p>
+</header>
+
+<main>
+  <button onclick="requestPermission()">Aktifkan Notifikasi</button>
+
+  <h3>➕ Tambah Jadwal</h3>
+
+  <form id="formJadwal">
+    <select id="hari">
+      <option>Monday</option>
+      <option>Tuesday</option>
+      <option>Wednesday</option>
+      <option>Thursday</option>
+      <option>Friday</option>
+    </select>
+
+    <input type="time" id="mulai" required>
+    <input type="text" id="mapel" placeholder="Mapel" required>
+    <input type="text" id="kelas" placeholder="Kelas" required>
+
+    <button type="submit">Simpan</button>
+  </form>
+
+  <section id="jadwal"></section>
+</main>
+
+<script src="app.js"></script>
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("service-worker.js");
+  }
+</script>
+
+</body>
+</html>
