@@ -1,7 +1,7 @@
 {
 "name": "Pengingat Jadwal Mengajar",
 "short_name": "Jadwal Guru",
-"start_url": "/",
+"start_url": "/index.html",
 "display": "standalone",
 "background_color": "#ffffff",
 "theme_color": "#1a1a1a",
