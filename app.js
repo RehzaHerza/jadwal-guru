@@ -1,152 +1,189 @@
-// =======================
+// =====================
 // REGISTER SERVICE WORKER
-// =======================
+// =====================
 
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("service-worker.js");
+navigator.serviceWorker.register("service-worker.js");
 }
 
-// =======================
-// DATA JADWAL DEFAULT
-// =======================
+// =====================
+// STATE
+// =====================
 
-const defaultJadwal = [
-  { hari:"Monday", mulai:"10:15", mapel:"Bahasa Indonesia", kelas:"X TSM"},
-  { hari:"Monday", mulai:"12:50", mapel:"TPTUP", kelas:"X TPTUP"},
-
-  { hari:"Tuesday", mulai:"11:25", mapel:"Bahasa Indonesia", kelas:"X TPTUP"},
-  { hari:"Tuesday", mulai:"13:25", mapel:"Bahasa Indonesia", kelas:"XC TKR"},
-
-  { hari:"Wednesday", mulai:"09:10", mapel:"RPL", kelas:"XI RPL"},
-  { hari:"Wednesday", mulai:"10:15", mapel:"RPL (lanjutan)", kelas:"XI RPL"},
-  { hari:"Wednesday", mulai:"13:25", mapel:"TPTUP", kelas:"X TPTUP"},
-
-  { hari:"Thursday", mulai:"12:50", mapel:"TPTUP", kelas:"X TPTUP"},
-
-  { hari:"Friday", mulai:"07:50", mapel:"Bahasa Indonesia", kelas:"X TSM"},
-  { hari:"Friday", mulai:"08:50", mapel:"Bahasa Indonesia", kelas:"XC TKR"},
-  { hari:"Friday", mulai:"10:05", mapel:"Bahasa Indonesia", kelas:"X TPTUP"}
-];
-
-// simpan jika belum ada
-if(!localStorage.getItem("jadwal")){
-  localStorage.setItem("jadwal", JSON.stringify(defaultJadwal));
-}
-
-let jadwalGuru = JSON.parse(localStorage.getItem("jadwal"));
-
-// =======================
-// TAMPILKAN JADWAL
-// =======================
+let jadwalGuru = JSON.parse(localStorage.getItem("jadwalGuru")) || [];
 
 const list = document.getElementById("listJadwal");
-
-function tampilkanJadwal(){
-
-  list.innerHTML = "";
-
-  jadwalGuru.forEach(j => {
-
-    let li = document.createElement("li");
-    li.textContent = `${j.hari} | ${j.mulai} | ${j.mapel} | ${j.kelas}`;
-    list.appendChild(li);
-
-  });
-
-}
-
-tampilkanJadwal();
-
-// =======================
-// NOTIF UI
-// =======================
-
-const btnNotif = document.getElementById("btnNotif");
 const statusNotif = document.getElementById("statusNotif");
 const infoPWA = document.getElementById("infoPWA");
 
-function updateStatusNotif(){
+// =====================
+// SAVE
+// =====================
 
-  if(!("Notification" in window)){
-    statusNotif.innerText = "Device tidak support notif";
-    btnNotif.disabled = true;
-    return;
-  }
-
-  if(Notification.permission === "granted"){
-    statusNotif.innerText = "Notifikasi AKTIF";
-    btnNotif.disabled = true;
-  }
-
-  else if(Notification.permission === "denied"){
-    statusNotif.innerText = "Notif ditolak. Ubah di setting browser.";
-    btnNotif.disabled = true;
-  }
-
-  else{
-    statusNotif.innerText = "Belum aktif";
-  }
+function saveData(){
+localStorage.setItem("jadwalGuru", JSON.stringify(jadwalGuru));
+renderJadwal();
 }
 
-btnNotif.onclick = async () => {
-  await Notification.requestPermission();
-  updateStatusNotif();
+// =====================
+// RENDER JADWAL
+// =====================
+
+function renderJadwal(){
+
+list.innerHTML="";
+
+jadwalGuru.forEach((j,i)=>{
+
+const li = document.createElement("li");
+
+li.textContent = `${j.hari} - ${j.mulai} | ${j.mapel} (${j.kelas})`;
+
+const del = document.createElement("button");
+del.textContent="Hapus";
+del.onclick = ()=>{
+jadwalGuru.splice(i,1);
+saveData();
 };
 
-updateStatusNotif();
+li.appendChild(del);
+list.appendChild(li);
 
-// =======================
-// INFO INSTALL PWA
-// =======================
+});
 
-if(window.matchMedia('(display-mode: standalone)').matches){
-  infoPWA.innerText = "App sudah terinstall";
-}
-else{
-  infoPWA.innerText = "Disarankan install app agar notifikasi stabil";
 }
 
-// =======================
-// REMINDER −5 MENIT
-// =======================
+renderJadwal();
+
+// =====================
+// FORM INPUT
+// =====================
+
+document.getElementById("formJadwal").onsubmit = e=>{
+
+e.preventDefault();
+
+jadwalGuru.push({
+hari: document.getElementById("hari").value,
+mulai: document.getElementById("jam").value,
+mapel: document.getElementById("mapel").value,
+kelas: document.getElementById("kelas").value
+});
+
+saveData();
+e.target.reset();
+
+};
+
+// =====================
+// BACKUP
+// =====================
+
+document.getElementById("exportBtn").onclick=()=>{
+
+const data = JSON.stringify(jadwalGuru);
+const blob = new Blob([data],{type:"application/json"});
+const a = document.createElement("a");
+a.href = URL.createObjectURL(blob);
+a.download = "jadwal.json";
+a.click();
+
+};
+
+// =====================
+// RESTORE
+// =====================
+
+document.getElementById("importFile").onchange=e=>{
+
+const file = e.target.files[0];
+const reader = new FileReader();
+
+reader.onload = ()=>{
+jadwalGuru = JSON.parse(reader.result);
+saveData();
+};
+
+reader.readAsText(file);
+
+};
+
+// =====================
+// NOTIF ENGINE
+// =====================
+
+function requestNotif(){
+
+Notification.requestPermission().then(p=>{
+if(p==="granted"){
+statusNotif.textContent="Status: Aktif";
+}
+});
+
+}
+
+document.getElementById("btnNotif").onclick=requestNotif;
+
+// =====================
+// REMINDER ENGINE
+// =====================
 
 function menitSekarang(){
-  let now = new Date();
-  return now.getHours()*60 + now.getMinutes();
+
+const now = new Date();
+return now.getHours()*60 + now.getMinutes();
+
 }
 
-function menitDariJam(str){
-  let [h,m] = str.split(":").map(Number);
-  return h*60+m;
+function menitDariJam(j){
+
+const [h,m]=j.split(":");
+return parseInt(h)*60 + parseInt(m);
+
 }
 
 function cekReminder(){
 
-  if(Notification.permission !== "granted") return;
+if(Notification.permission!=="granted") return;
 
-  let hari = new Date().toLocaleString("en-US",{weekday:"long"});
-  let menitNow = menitSekarang();
+const now = new Date();
+const hari = now.toLocaleString("en-US",{weekday:"long"});
+const menitNow = menitSekarang();
 
-  jadwalGuru.forEach(j => {
+jadwalGuru.forEach(j=>{
 
-    if(j.hari !== hari) return;
+if(j.hari!==hari) return;
 
-    let mulai = menitDariJam(j.mulai);
+const mulai = menitDariJam(j.mulai);
 
-    if(mulai - 5 === menitNow){
-      new Notification("⏰ 5 menit lagi", {
-        body:`${j.mapel} - ${j.kelas}`
-      });
-    }
+// 5 menit sebelum
+if(mulai-5 === menitNow){
 
-    if(mulai === menitNow){
-      new Notification("📚 Waktunya Mengajar", {
-        body:`${j.mapel} - ${j.kelas}`
-      });
-    }
-
-  });
+new Notification("5 Menit Lagi",{
+body:`${j.mapel} (${j.kelas})`
+});
 
 }
 
-setInterval(cekReminder, 60000);
+// tepat waktu
+if(mulai === menitNow){
+
+new Notification("Waktunya Mengajar",{
+body:`${j.mapel} (${j.kelas})`
+});
+
+}
+
+});
+
+}
+
+setInterval(cekReminder,30000);
+
+// =====================
+// STATUS PWA
+// =====================
+
+window.addEventListener("beforeinstallprompt", e=>{
+infoPWA.textContent="Aplikasi bisa diinstall";
+});

@@ -1,27 +1,23 @@
-const CACHE = "jadwal-v1";
+const CACHE_NAME = "jadwal-guru-v1";
 
-self.addEventListener("install", e => {
+const urls = [
+"/",
+"/index.html",
+"/style.css",
+"/app.js",
+"/manifest.json",
+"/icon-192.png",
+"/icon-512.png"
+];
 
-  e.waitUntil(
-    caches.open(CACHE).then(cache => {
-      return cache.addAll([
-        "./",
-        "index.html",
-        "style.css",
-        "app.js",
-        "manifest.json",
-        "icon-192.png",
-        "icon-512.png"
-      ]);
-    })
-  );
-
+self.addEventListener("install",e=>{
+e.waitUntil(
+caches.open(CACHE_NAME).then(c=>c.addAll(urls))
+);
 });
 
-self.addEventListener("fetch", e => {
-
-  e.respondWith(
-    caches.match(e.request).then(r => r || fetch(e.request))
-  );
-
+self.addEventListener("fetch",e=>{
+e.respondWith(
+caches.match(e.request).then(r=>r||fetch(e.request))
+);
 });
