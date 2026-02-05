@@ -5,50 +5,35 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="manifest" href="manifest.json">
-<link rel="stylesheet" href="style.css">
+<meta name="theme-color" content="#0d47a1">
 
-<title>Jadwal Mengajar</title>
+<title>Pengingat Jadwal Guru</title>
+
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
 <header>
-  <h1>📚 Jadwal Mengajar</h1>
+<h1>📚 Pengingat Jadwal Mengajar</h1>
 </header>
 
+<main>
+
 <section class="card">
-  <button id="btnNotif">Aktifkan Notifikasi</button>
+<button id="btnNotif">Aktifkan Notifikasi</button>
+<p id="statusNotif">Status: Mengecek...</p>
+<p id="infoPWA"></p>
 </section>
 
 <section class="card">
-  <h2>Jadwal Mingguan</h2>
-  <div id="jadwalList"></div>
+<h2>Jadwal Mengajar</h2>
+<ul id="listJadwal"></ul>
 </section>
 
-<section class="card">
-  <h2>Tambah / Edit Jadwal</h2>
-
-  <select id="hari">
-    <option>Monday</option>
-    <option>Tuesday</option>
-    <option>Wednesday</option>
-    <option>Thursday</option>
-    <option>Friday</option>
-  </select>
-
-  <input type="time" id="mulai">
-  <input type="text" id="mapel" placeholder="Mata Pelajaran">
-  <input type="text" id="kelas" placeholder="Kelas">
-
-  <button onclick="tambahJadwal()">Simpan Jadwal</button>
-</section>
-
-<section class="card">
-  <h2>Backup Jadwal</h2>
-  <button onclick="exportData()">Export</button>
-  <input type="file" id="importFile" onchange="importData(event)">
-</section>
+</main>
 
 <script src="app.js"></script>
+
 </body>
 </html>
