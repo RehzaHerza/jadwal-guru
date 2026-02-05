@@ -1,4 +1,4 @@
-const CACHE_NAME = "jadwal-guru-v1";
+const CACHE_NAME = "jadwal-guru-v2";
 
 const urls = [
 "/",
